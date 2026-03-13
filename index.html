@@ -108,14 +108,35 @@
     const timeEl = document.getElementById("time");
 
     // Spočítáme cílový čas konce
-    const endAt = Date.now() + DURATION_SECONDS * 1000;
+    const restartBtn = document.getElementById("restartBtn");
 
-    function formatMMSS(totalSeconds) {
-      const s = Math.max(0, Math.floor(totalSeconds));
-      const mm = String(Math.floor(s / 60)).padStart(2, "0");
-      const ss = String(s % 60).padStart(2, "0");
-      return `${mm}:${ss}`;
-    }
+let endAt = 0;
+let timerId = null;
+
+function startTimer() {
+  // nastavíme konec na teď + 15 minut
+  endAt = Date.now() + DURATION_SECONDS * 1000;
+
+  // UI do stavu "běží"
+  stateEl.classList.add("running");
+  stateEl.classList.remove("done");
+
+  // kdyby už něco běželo, tak to zastavíme
+  if (timerId) clearInterval(timerId);
+
+  // první vykreslení + interval
+  tick();
+  timerId = setInterval(tick, 250);
+}
+
+function restartTimer() {
+  startTimer();
+}
+
+restartBtn.addEventListener("click", restartTimer);
+
+// start hned po načtení
+startTimer();
 
     function tick() {
       const remainingMs = endAt - Date.now();
