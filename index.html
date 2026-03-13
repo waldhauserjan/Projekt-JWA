@@ -126,7 +126,15 @@ function startTimer() {
 
   // první vykreslení + interval
   tick();
-  timerId = setInterval(tick, 250);
+
+if (remainingMs <= 0) {
+  timeEl.textContent = "00:00";
+  stateEl.classList.remove("running");
+  stateEl.classList.add("done");
+  clearInterval(timerId);
+  timerId = null;
+}
+
 }
 
 function restartTimer() {
