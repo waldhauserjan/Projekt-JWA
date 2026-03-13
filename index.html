@@ -1,169 +1,50 @@
-<!doctype html>
-<html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Workshop Timer</title>
-  <style>
-    :root {
-      --bg: #0b1220;
-      --fg: #20C997;
-      --accent: #4ade80;
-      --danger: #fb7185;
+<script>
+  // MVP nastavení
+  const DURATION_SECONDS = 15 * 60; // 15 minut
+  const stateEl = document.getElementById("state");
+  const timeEl = document.getElementById("time");
+  const restartBtn = document.getElementById("restartBtn");
+
+  let endAt = 0;
+  let timerId = null;
+
+  function formatMMSS(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds));
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }
+
+  function tick() {
+    const remainingMs = endAt - Date.now();
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+    timeEl.textContent = formatMMSS(remainingSeconds);
+
+    if (remainingMs <= 0) {
+      timeEl.textContent = "00:00";
+      stateEl.classList.remove("running");
+      stateEl.classList.add("done");
+
+      if (timerId) clearInterval(timerId);
+      timerId = null;
     }
+  }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
+  function startTimer() {
+    endAt = Date.now() + DURATION_SECONDS * 1000;
 
-    .wrap {
-      text-align: center;
-      padding: 24px;
-    }
+    stateEl.classList.add("running");
+    stateEl.classList.remove("done");
 
-    .label {
-      opacity: .75;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(tick, 250);
 
-    #time {
-      font-variant-numeric: tabular-nums;
-      font-size: clamp(72px, 14vw, 160px);
-      font-weight: 800;
-      line-height: 1;
-      padding: 18px 28px;
-      border-radius: 18px;
-      border: 2px solid rgba(230, 238, 252, 0.12);
-      background: rgba(255, 255, 255, 0.04);
-      box-shadow: 0 12px 45px rgba(0,0,0,.35);
-    }
+    tick(); // vykresli hned
+  }
 
-    .running #time {
-      border-color: rgba(74, 222, 128, 0.35);
-    }
+  restartBtn.addEventListener("click", startTimer);
 
-    .done #time {
-      border-color: rgba(251, 113, 133, 0.55);
-      background: rgba(251, 113, 133, 0.12);
-      animation: pulse 900ms ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .hint {
-      margin-top: 14px;
-      opacity: .7;
-      font-size: 14px;
-    }
-    #restartBtn {
-  margin-top: 16px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(230, 238, 252, 0.18);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--fg);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-#restartBtn:hover {
-  background: rgba(255, 255, 255, 0.10);
-}
-
-#restartBtn:active {
-  transform: translateY(1px);
-}
-
-#restartBtn:focus-visible {
-  outline: 3px solid rgba(45, 212, 191, 0.5); /* klidně uprav */
-  outline-offset: 3px;
-}
-  </style>
-</head>
-
-<body>
-  <div class="wrap running" id="state">
-    <div class="label">Workshop timer</div>
-    <div id="time" aria-live="polite">15:00</div>
-    <button id="restartBtn" type="button">Restart</button>
-    <div class="hint">Načtení/refresh = start od 15:00</div>
-  </div>
-
-  <script>
-    // MVP nastavení
-    const DURATION_SECONDS = 15 * 60; // 15 minut
-    const stateEl = document.getElementById("state");
-    const timeEl = document.getElementById("time");
-
-    // Spočítáme cílový čas konce
-    const restartBtn = document.getElementById("restartBtn");
-
-let endAt = 0;
-let timerId = null;
-
-function startTimer() {
-  // nastavíme konec na teď + 15 minut
-  endAt = Date.now() + DURATION_SECONDS * 1000;
-
-  // UI do stavu "běží"
-  stateEl.classList.add("running");
-  stateEl.classList.remove("done");
-
-  // kdyby už něco běželo, tak to zastavíme
-  if (timerId) clearInterval(timerId);
-
-  // první vykreslení + interval
-  tick();
-
-if (remainingMs <= 0) {
-  timeEl.textContent = "00:00";
-  stateEl.classList.remove("running");
-  stateEl.classList.add("done");
-  clearInterval(timerId);
-  timerId = null;
-}
-
-}
-
-function restartTimer() {
+  // auto-start při načtení stránky
   startTimer();
-}
-
-restartBtn.addEventListener("click", restartTimer);
-
-// start hned po načtení
-startTimer();
-
-    function tick() {
-      const remainingMs = endAt - Date.now();
-      const remainingSeconds = Math.ceil(remainingMs / 1000);
-
-      timeEl.textContent = formatMMSS(remainingSeconds);
-
-      if (remainingMs <= 0) {
-        // konec
-        timeEl.textContent = "00:00";
-        stateEl.classList.remove("running");
-        stateEl.classList.add("done");
-        clearInterval(timerId);
-      }
-    }
-
-    // první vykreslení hned + pak update
-    tick();
-    const timerId = setInterval(tick, 250); // 4× za sekundu, vizuálně plynulé, ale pořád jednoduché
-  </script>
-</body>
-</html>
+</script>
