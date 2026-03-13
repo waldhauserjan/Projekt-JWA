@@ -75,7 +75,28 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.02); }
     }
+.buttons button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(230, 238, 252, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(230, 238, 252, 0.92);
+  font-weight: 700;
+  cursor: pointer;
+}
 
+.buttons button:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.buttons button:active {
+  transform: translateY(1px);
+}
+
+.buttons button:focus-visible {
+  outline: 3px solid rgba(45, 212, 191, 0.5);
+  outline-offset: 3px;
+}
     #restartBtn {
       margin-top: 16px;
       padding: 10px 16px;
